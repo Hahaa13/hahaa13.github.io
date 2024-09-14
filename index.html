@@ -1,1 +1,75 @@
-Hello Wolrd
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Cube to Image</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+        #image-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Tạo cảnh (scene)
+        const scene = new THREE.Scene();
+        
+        // Tạo camera
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+        
+        // Tạo renderer
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        
+        // Tạo hình lập phương (cube)
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+        
+        // Hàm render
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Xoay hình lập phương
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+
+        // Hàm chờ để chắc chắn rằng ảnh đã được render
+        function captureImage() {
+            // Lấy canvas và chuyển đổi thành ảnh
+            const canvas = renderer.domElement;
+            const dataURL = canvas.toDataURL();
+            
+            // Tạo thẻ img để hiển thị ảnh
+            const img = document.createElement('img');
+            img.src = dataURL;
+            img.alt = 'Rendered Cube';
+            document.body.appendChild(img);
+        }
+        
+        // Đợi 2 giây rồi chụp ảnh
+        setTimeout(() => {
+            captureImage();
+        }, 2000);
+        
+        // Xử lý khi thay đổi kích thước cửa sổ
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+    </script>
+</body>
+</html>
