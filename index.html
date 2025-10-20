@@ -1,75 +1,86 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js Cube to Image</title>
-    <style>
-        body { margin: 0; }
-        canvas { display: block; }
-        #image-container {
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Random 1–40</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;display:flex;
+         align-items:center;justify-content:center;min-height:100vh;margin:0;background:linear-gradient(135deg,#f8fafc,#e6eef8);}
+    .card{background:white;padding:28px;border-radius:12px;box-shadow:0 8px 30px rgba(20,30,60,0.08);text-align:center;max-width:360px;width:90%;}
+    h1{margin:0 0 10px;font-size:20px}
+    #num{font-size:72px;font-weight:700;margin:14px 0;color:#0f172a;letter-spacing:2px;}
+    button{cursor:pointer;padding:10px 16px;border-radius:8px;border:0;background:#0ea5e9;color:white;font-weight:600;font-size:16px}
+    .row{display:flex;gap:10px;justify-content:center;margin-top:12px}
+    .small{padding:8px 10px;border-radius:8px;border:1px solid #d1d5db;background:white;font-weight:600}
+    #hint{font-size:13px;color:#475569;margin-top:8px}
+  </style>
 </head>
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        // Tạo cảnh (scene)
-        const scene = new THREE.Scene();
-        
-        // Tạo camera
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 5;
-        
-        // Tạo renderer
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-        
-        // Tạo hình lập phương (cube)
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
-        
-        // Hàm render
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            // Xoay hình lập phương
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-            
-            renderer.render(scene, camera);
-        }
-        
-        animate();
+  <main class="card" role="main">
+    <h1>Random number 1–40</h1>
+    <div id="num" aria-live="polite">—</div>
+    <div class="row">
+      <button id="rnd">🎲 Random!</button>
+      <button id="copy" class="small">Copy</button>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <button id="min1" class="small">Min=1</button>
+      <button id="max40" class="small">Max=40</button>
+    </div>
+    <div id="hint">Nhấn <strong>Space</strong> để random. Tự động chọn giá trị trong khoảng hiện tại.</div>
+  </main>
 
-        // Hàm chờ để chắc chắn rằng ảnh đã được render
-        function captureImage() {
-            // Lấy canvas và chuyển đổi thành ảnh
-            const canvas = renderer.domElement;
-            const dataURL = canvas.toDataURL();
-            
-            // Tạo thẻ img để hiển thị ảnh
-            const img = document.createElement('img');
-            img.src = dataURL;
-            img.alt = 'Rendered Cube';
-            document.body.appendChild(img);
-        }
-        
-        // Đợi 2 giây rồi chụp ảnh
-        setTimeout(() => {
-            captureImage();
-        }, 2000);
-        
-        // Xử lý khi thay đổi kích thước cửa sổ
-        window.addEventListener('resize', () => {
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-        });
-    </script>
+  <script>
+    let min = 1, max = 40;
+    const numEl = document.getElementById('num');
+    const rndBtn = document.getElementById('rnd');
+    const copyBtn = document.getElementById('copy');
+    const minBtn = document.getElementById('min1');
+    const maxBtn = document.getElementById('max40');
+
+    function randInt(a,b){
+      a = Math.ceil(a); b = Math.floor(b);
+      return Math.floor(Math.random() * (b - a + 1)) + a;
+    }
+
+    function show(n){
+      numEl.textContent = n;
+      // brief highlight animation
+      numEl.animate([{transform:'scale(0.96)', opacity:0.8},{transform:'scale(1)',opacity:1}], {duration:180, easing:'ease-out'});
+    }
+
+    rndBtn.addEventListener('click', ()=> show(randInt(min,max)));
+    copyBtn.addEventListener('click', ()=>{
+      const text = numEl.textContent;
+      if(!text || text === '—') return alert('Chưa có số để copy. Nhấn Random trước.');
+      navigator.clipboard?.writeText(text).then(()=> alert('Copied: '+text), ()=> alert('Không thể copy. Hãy copy thủ công.'));
+    });
+
+    minBtn.addEventListener('click', ()=> {
+      const v = prompt('Nhập min (số nguyên ≥ 1):', String(min));
+      if(v===null) return;
+      const nv = parseInt(v);
+      if(Number.isInteger(nv) && nv >= 1 && nv < max){ min = nv; alert('Min set to '+min); }
+      else alert('Giá trị không hợp lệ. Đảm bảo min ≥1 và < max.');
+    });
+
+    maxBtn.addEventListener('click', ()=> {
+      const v = prompt('Nhập max (số nguyên ≤ 1000):', String(max));
+      if(v===null) return;
+      const nv = parseInt(v);
+      if(Number.isInteger(nv) && nv > min && nv <= 1000){ max = nv; alert('Max set to '+max); }
+      else alert('Giá trị không hợp lệ. Đảm bảo max > min và ≤ 1000.');
+    });
+
+    // keyboard support: Space to random, Enter on button
+    document.addEventListener('keydown', (e)=>{
+      if(e.code === 'Space'){ e.preventDefault(); rndBtn.click(); }
+      if(e.key === 'Enter'){ if(document.activeElement === copyBtn) copyBtn.click(); }
+    });
+
+    // On load show a random one
+    show('—');
+  </script>
 </body>
 </html>
